@@ -3,9 +3,7 @@ package com.rros.silanislottery;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -79,6 +77,95 @@ public class SilanisLotteryTest {
                 .as("Previous winning tickets are available for purchase again").contains(Arrays.stream(currentDraw).boxed().toArray(Integer[]::new));
     }
 
+
+    @Test
+    public void testComputePrices() throws Exception {
+        // test initialisation
+        final int initialPot = this.lottery.getPot();
+
+        // test body
+        final int[] prices = this.lottery.computePrices();
+        assertThat(prices)
+                .hasSize(SilanisLottery.NB_WINNERS);
+        assertThat(prices)
+                .as("75%, 15% and 10% of half the initial pot")
+                .isEqualTo(new int[]{initialPot / 2 * 3 / 4, initialPot / 2 * 3 / 20, initialPot / 2 / 10});
+    }
+
+    @Test
+    public void testDrawLotteryNoWinnerImpliesPotNotUpdated() throws Exception {
+        // test initialisation
+        final int initialPot = this.lottery.getPot();
+
+        // test body
+        this.lottery.drawLottery();
+        assertThat(this.lottery.getPot())
+                .as("No winners implies the pot is not updated").isEqualTo(initialPot);
+    }
+
+    @Test
+    public void testDrawLotteryPotUpdated() throws Exception {
+        // Test initialization
+        int currentPot = this.lottery.getPot();
+        final int nbConsecutiveLotteries = 10;
+        final int nbParticipants = 20;
+
+        for (int i = 0; i < nbConsecutiveLotteries; i++) {
+            final Set<Integer> tickets = new HashSet<>();
+            for (int j = 0; j < nbParticipants; j++) {
+                tickets.add(this.lottery.purchaseTicket(TEST_BUYER_NAME));
+                // Increase the current pot with ticket price
+                currentPot += SilanisLottery.TICKET_PRICE;
+            }
+
+            this.lottery.drawLottery();
+
+            // pay the winners:
+            for (final Winner winner : this.lottery.getWinners()) {
+                if (winner == null) {
+                    // ticket was not purchased
+                    continue;
+                }
+
+                currentPot -= winner.getPrice();
+            }
+        }
+
+        assertThat(currentPot)
+                .as("The pot has been updated correctly")
+                .isEqualTo(this.lottery.getPot());
+    }
+
+    @Test
+    public void testGetWinnersWithNoTicketPurchased() throws Exception {
+        // test initialisation
+        this.lottery.drawLottery();
+
+        // test body
+        final Winner[] winners = this.lottery.getWinners();
+        assertThat(winners)
+                .hasSize(SilanisLottery.NB_WINNERS)
+                .as("No tickets were purchased: we expect null-valued array").isEqualTo(new Winner[SilanisLottery.NB_WINNERS]);
+    }
+
+    @Test
+    public void testGetWinnersThrowsNoPreviousDrawException() throws Exception {
+        assertThatExceptionOfType(NoPreviousDrawException.class)
+                .isThrownBy(() -> this.lottery.getWinners());
+    }
+
+    /**
+     * We force the lottery draw and observe the output is correct.
+     */
+    @Test
+    public void testGetWinners() throws Exception {
+        // TODO
+    }
+
+    /**
+     * This only tests the String produced is conform. The underlying
+     * logic is tested elsewhere.
+     */
     @Test
     public void testProduceDisplayWinners() throws Exception {
         // test initialisation
@@ -110,7 +197,7 @@ public class SilanisLotteryTest {
     }
 
     @Test
-    public void testProduceDisplayWinnersWithoutDrawingFirst() throws Exception {
+    public void testProduceDisplayWinnersThrowsNoPreviousDrawException() throws Exception {
         assertThatExceptionOfType(NoPreviousDrawException.class).isThrownBy(
                 () -> this.lottery.produceDisplayWinners()
         );
@@ -123,35 +210,5 @@ public class SilanisLotteryTest {
             fail("Unexpected exception: the lottery has been drawn");
         }
     }
-
-    @Test
-    public void testGetWinners() throws Exception {
-        // test initialisation
-        final int initialPot = this.lottery.getPot();
-        this.lottery.drawLottery();
-
-        // test body
-        final Winner[] winners = this.lottery.getWinners();
-        assertThat(winners)
-                .hasSize(SilanisLottery.NB_WINNERS);
-        assertThat(winners)
-                .extracting("price", Integer.class)
-                .as("75%, 15% and 10% of half the initial pot")
-                .isEqualTo(new Integer[]{initialPot / 2 * 3 / 4, initialPot / 2 * 3 / 20, initialPot / 2 / 10});
-    }
-
-    @Test
-    public void testDrawLotteryUpdatesPotCorrectly() throws Exception {
-        // TODO
-    }
-
-    /**
-     * We force the lottery draw and observe the output is correct.
-     */
-    @Test
-    public void testGetWinnersDrawsProperly() throws Exception {
-        // TODO
-    }
-
 
 }
