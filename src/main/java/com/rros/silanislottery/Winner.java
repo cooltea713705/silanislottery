@@ -5,9 +5,9 @@ package com.rros.silanislottery;
  */
 public class Winner {
     /**
-     * Winning price
+     * Winning prize
      */
-    private final int price;
+    private final int prize;
 
     /**
      * Winner's first name (might be null)
@@ -18,15 +18,15 @@ public class Winner {
      * Instantiate a winner to be displayed
      *
      * @param firstName winner's first name, might be null
-     * @param price     winning price
+     * @param prize     winning prize
      */
-    public Winner(final String firstName, final int price) {
+    public Winner(final String firstName, final int prize) {
         this.firstName = firstName;
-        this.price = price;
+        this.prize = prize;
     }
 
-    public int getPrice() {
-        return price;
+    public int getPrize() {
+        return prize;
     }
 
     public String getFirstName() {

@@ -50,7 +50,9 @@ public class SilanisLottery {
     /**
      * Draw lottery.
      *
-     * Nota: this operation does not update the pot, getWinners does.
+     * Nota: this operation updates the pot: if a winning ball's ticket
+     * has been purchased, the winning prize is subtracted to the pot,
+     * otherwise the pot is left untouched.
      *
      * @return the values of the drawn balls
      */
@@ -60,23 +62,19 @@ public class SilanisLottery {
     }
 
     /**
-     * Compute the values of the prices for the current value of the pot.
+     * Compute the values of the prizes for the current value of the pot.
      * <p>
      * 75%, 15% and 10% of the pot rounded to the nearest integer value.
      *
-     * @return Array of NB_WINNERS int corresponding to the prices.
+     * @return Array of NB_WINNERS int corresponding to the prizes.
      */
-    int[] computePrices() {
+    int[] computePrizes() {
         // not implemented
         throw new RuntimeException("Not implemented");
     }
 
     /**
      * Get the winners of the latest draw.
-     *
-     * Nota: this operation updates the pot: if a winning ball's ticket
-     * has been purchased, the winning price is subtracted to the pot,
-     * otherwise the pot is left untouched.
      *
      * @return Array of NB_WINNERS Winner, one or more element might be null
      *         if the corresponding winning ball's ticket has not been
@@ -101,7 +99,7 @@ public class SilanisLottery {
      * @return string displaying the winners
      * @throws NoPreviousDrawException "You should draw first" if there was no previous draw
      */
-    public String produceDisplayWinners() throws NoPreviousDrawException {
+    public String generateWinnersMessage() throws NoPreviousDrawException {
         throw new RuntimeException("Not implemented");
     }
 
