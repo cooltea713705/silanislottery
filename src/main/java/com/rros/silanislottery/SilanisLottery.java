@@ -33,7 +33,32 @@ public class SilanisLottery {
     /**
      * Current lottery
      */
-    private SingleLottery currentLottery = new SingleLottery(INITIAL_POT);
+    private SingleLottery currentLottery;
+
+    /**
+     * Default behaviour: pot is INITIAL_POT
+     */
+    public SilanisLottery() {
+        this(INITIAL_POT);
+    }
+
+    /**
+     * This constructor is used so that we can handle a parameterized pot
+     *
+     * @param pot input pot
+     */
+    public SilanisLottery(final int pot) {
+        this(new SingleLottery(pot));
+    }
+
+    /**
+     * This constructor is used for test purposes.
+     *
+     * @param currentLottery input current lottery
+     */
+    SilanisLottery(final SingleLottery currentLottery) {
+        this.currentLottery = currentLottery;
+    }
 
     /**
      * Purchase a ticket.
@@ -65,53 +90,51 @@ public class SilanisLottery {
     }
 
     /**
-     * Get the winners of the latest draw.
+     * Produce the string displaying the winners of the latest draw
      *
-     * @return Array of NB_WINNERS Winner, one or more element might be null
-     *         if the corresponding winning ball's ticket has not been
-     *         purchased.
-     * @throws NoPreviousDrawException there was no previous draw
+     * Delegates to SingleLottery.generateWinnersMessage() for the
+     * previous lottery (if there was one).
+     *
+     * @return string displaying the winners of the latest draw
+     * @throws NoPreviousDrawException "You should draw first" if there was no previous draw
      */
-    Winner[] getWinners() throws NoPreviousDrawException {
+    public String generateWinnersMessage() throws NoPreviousDrawException {
         if (this.previousLottery == null) {
             throw new NoPreviousDrawException();
         }
 
-        try {
-            return this.previousLottery.getWinners();
-        } catch (final SingleLotteryNotDrawnException e) {
-            throw new IllegalStateException("The previous lottery should have been drawn", e);
-        }
+        return this.previousLottery.generateWinnersMessage();
     }
 
     /**
-     * Produce the string displaying the winners of the latest draw in standard output
-     * <p>
-     * The expected format is:
-     * 1st ball             2nd ball            3rd ball
-     * Dave: 75$            Remy: 15$           Greg: 10$
-     * <p>
-     * "No winner" is displayed if the ticket corresponding to a ball
-     * was not purchased.
-     *
-     * @return string displaying the winners
-     * @throws NoPreviousDrawException "You should draw first" if there was no previous draw
+     * Used for test purposes
+     * @return the previous lottery
      */
-    public String generateWinnersMessage() throws NoPreviousDrawException {
-        throw new RuntimeException("Not implemented");
+    SingleLottery getPreviousLottery() {
+        return previousLottery;
+    }
+
+    /**
+     * Used for test purposes
+     * @return true if tickets are available for the current lottery, false otherwise
+     */
+    boolean isTicketAvailable() {
+        return this.currentLottery.isTicketAvailable();
+    }
+
+    /**
+     * Used for test purposes
+     * @return the previous lottery winners
+     */
+    Winner[] getWinners() {
+        return this.previousLottery.getWinners();
     }
 
     /**
      * @return the current pot value
      */
-    int getPot() {
+    public int getPot() {
         return this.currentLottery.getPot();
     }
 
-    /**
-     * @return true if a ticket is available for the current draw, false otherwise
-     */
-    boolean isTicketAvailable() {
-        throw new RuntimeException("Not implemented");
-    }
 }

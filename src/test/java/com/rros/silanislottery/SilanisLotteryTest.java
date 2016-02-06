@@ -6,10 +6,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for com.rros.silanislottery.SilanisLottery
@@ -17,101 +17,58 @@ import static org.assertj.core.api.Assertions.*;
 public class SilanisLotteryTest {
 
     public static final String TEST_BUYER_NAME = "TEST_BUYER_NAME";
-    public static final Logger LOGGER = Logger.getGlobal();
-    // This pattern matches: n-th ball
-    public final static Pattern FIRST_LINE_PATTERN = Pattern.compile("[0-9]+[a-z]+ ball");
-    // This pattern matches: Dave: 75$
-    public final static Pattern SECOND_LINE_PATTERN = Pattern.compile("\\s*[^:]+: [0-9]+\\$");
-
-    public static final String NEW_LINE_PATTERN = "\\r?\\n";
 
     private SilanisLottery lottery;
 
+    private SingleLottery mockCurrentSingleLottery;
     @Before
     public void setUp() throws Exception {
-        this.lottery = new SilanisLottery();
+        this.mockCurrentSingleLottery = mock(SingleLottery.class);
+        this.lottery = new SilanisLottery(this.mockCurrentSingleLottery);
     }
 
     /**
-     * Test purchaseTicket()
+     * Test purchaseTicket() is delegated to SingleLottery
      */
     @Test
     public void testPurchaseTicket() throws Exception {
-        final int initialPot = this.lottery.getPot();
-        assertThat(initialPot).isEqualTo(SilanisLottery.INITIAL_POT);
-        assertThat(this.lottery.purchaseTicket(TEST_BUYER_NAME)).isBetween(1, SilanisLottery.MAX_BALL);
-
-        final int newPot = this.lottery.getPot();
-        assertThat(newPot).as("Pot value was updated consecutively to ticket purchase").isEqualTo(initialPot + SilanisLottery.TICKET_PRICE);
-    }
-
-    // nice-to-have: test distribution of balls drawn
-
-    /** Test purchaseTicket() throws NoMoreTicketException */
-    @Test
-    public void testPurchaseTicketThrowsNoMoreTicketException() throws Exception {
-        final List<Integer> boughtTickets = new ArrayList<>();
-        try {
-            while (this.lottery.isTicketAvailable()) {
-                boughtTickets.add(this.lottery.purchaseTicket(TEST_BUYER_NAME));
-            }
-        } catch (final NoAvailableTicketException e) {
-            fail("Unexpected exception", e);
-        }
-        assertThat(boughtTickets).hasSize(SilanisLottery.MAX_BALL);
-        // We expect the SilanisLottery.MAX_BALL + 1-th draw (and all subsequent) throws exception
-        assertThatExceptionOfType(NoAvailableTicketException.class).isThrownBy(() -> this.lottery.purchaseTicket(TEST_BUYER_NAME));
-        assertThatExceptionOfType(NoAvailableTicketException.class).isThrownBy(() -> this.lottery.purchaseTicket(TEST_BUYER_NAME));
+        this.lottery.purchaseTicket(TEST_BUYER_NAME);
+        // expect strictly one call to SingleLottery.purchaseTicket(String)
+        verify(this.mockCurrentSingleLottery, times(1)).purchaseTicket(TEST_BUYER_NAME);
     }
 
     /** Test drawLottery() */
     @Test
     public void testDrawLottery() throws Exception {
-        final int[] currentDraw = this.lottery.drawLottery();
-        assertThat(currentDraw)
-                .hasSize(SilanisLottery.NB_WINNERS);
-        for (final int ball : currentDraw) {
-            assertThat(ball).isBetween(1, SilanisLottery.MAX_BALL);
-        }
-
-        final List<Integer> ticketsAvailableAfterDraw = new ArrayList<>();
-        while (this.lottery.isTicketAvailable()) {
-            ticketsAvailableAfterDraw.add(this.lottery.purchaseTicket(TEST_BUYER_NAME));
-        }
-        assertThat(ticketsAvailableAfterDraw)
-                .hasSize(SilanisLottery.MAX_BALL)
-                // converts int[] to Integer[] http://stackoverflow.com/a/27043087/618156
-                .as("Previous winning tickets are available for purchase again").contains(Arrays.stream(currentDraw).boxed().toArray(Integer[]::new));
-    }
-
-    /** Test drawLottery() with no buyer results in the pot not being updated */
-    @Test
-    public void testDrawLotteryNoWinnerImpliesPotNotUpdated() throws Exception {
-        // test initialisation
-        final int initialPot = this.lottery.getPot();
-
-        // test body
+        assertThat(this.lottery.getPreviousLottery()).isNull();
         this.lottery.drawLottery();
-        assertThat(this.lottery.getPot())
-                .as("No winners implies the pot is not updated").isEqualTo(initialPot);
+
+        // expect strictly one call delegated to SingleLottery.drawLottery
+        verify(this.mockCurrentSingleLottery, times(1)).drawLottery();
+        assertThat(this.lottery.getPreviousLottery())
+                .isNotNull()
+                .as("The 'current lottery' should have been assigned to SilanisLottery.previousLottery")
+                .isEqualTo(this.mockCurrentSingleLottery);
     }
 
-    /** Test drawLottery() updates the pot correctly */
+    /**
+     * Test the pot is updated correctly after multiple lotteries
+     */
     @Test
     public void testDrawLotteryPotUpdated() throws Exception {
         // Test initialization
+        // Does not use mock
+        this.lottery = new SilanisLottery();
         int currentPot = this.lottery.getPot();
         final int nbConsecutiveLotteries = 10;
         final int nbParticipants = 20;
 
+        // Test body
         for (int i = 0; i < nbConsecutiveLotteries; i++) {
             for (int j = 0; j < nbParticipants; j++) {
                 this.lottery.purchaseTicket(TEST_BUYER_NAME);
                 // Increase the current pot with ticket price
                 currentPot += SilanisLottery.TICKET_PRICE;
-                assertThat(currentPot)
-                        .as("The pot has been updated correctly")
-                        .isEqualTo(this.lottery.getPot());
             }
 
             this.lottery.drawLottery();
@@ -125,133 +82,62 @@ public class SilanisLotteryTest {
 
                 currentPot -= winner.getPrize();
             }
-            assertThat(currentPot)
-                    .as("The pot has been updated correctly")
-                    .isEqualTo(this.lottery.getPot());
         }
+        assertThat(this.lottery.getPot())
+                .as("The pot value")
+                .isEqualTo(currentPot);
     }
 
-    /**
-     * Test getWinners() while there is no ticket purchased which should
-     * results in no winner.
-     */
-
+    /** Test purchaseTicket() after drawLottery(): the previous winning tickets should be available for purchase again */
     @Test
-    public void testGetWinnersWithNoTicketPurchased() throws Exception {
-        // test initialisation
-        this.lottery.drawLottery();
+    public void testPurchasingTicketsDrawLottery() throws Exception {
+        // Test initialization: does not use the mock
+        this.lottery = new SilanisLottery();
 
-        // test body
-        final Winner[] winners = this.lottery.getWinners();
-        assertThat(winners)
-                .hasSize(SilanisLottery.NB_WINNERS)
-                .as("No tickets were purchased: we expect null-valued array").isEqualTo(new Winner[SilanisLottery.NB_WINNERS]);
-    }
+        // Test body
+        final int[] currentDraw = this.lottery.drawLottery();
 
-    /**
-     * Test getWinners() throws NoPreviousDrawException
-     */
-    @Test
-    public void testGetWinnersThrowsNoPreviousDrawException() throws Exception {
-        assertThatExceptionOfType(NoPreviousDrawException.class)
-                .isThrownBy(() -> this.lottery.getWinners());
-    }
+        for (final int ball : currentDraw) {
+            assertThat(ball).isBetween(1, SilanisLottery.MAX_BALL);
+        }
 
-    /**
-     * Test getWinners()
-     */
-    @Test
-    public void testGetWinners() throws Exception {
-        fail("Was not implemented");
-        // TODO
-    }
-
-    /**
-     * Test getWinners() has a null-element for each ball drawn which
-     * ticket has not been bought
-     */
-    @Test
-    public void testGetWinnersWithAtLeastANonWinner() throws Exception {
-        fail("Was not implemented");
-        // TODO: force drawing a non-winning ball and check getWinners()
+        final List<Integer> ticketsAvailableAfterDraw = new ArrayList<>();
+        while (this.lottery.isTicketAvailable()) {
+            ticketsAvailableAfterDraw.add(this.lottery.purchaseTicket(TEST_BUYER_NAME));
+        }
+        assertThat(ticketsAvailableAfterDraw)
+                .hasSize(SilanisLottery.MAX_BALL)
+                // converts int[] to Integer[] http://stackoverflow.com/a/27043087/618156
+                .as("All tickets available")
+                .contains(Arrays.stream(currentDraw).boxed().toArray(Integer[]::new));
     }
 
     /**
      * Test generateWinnersMessage()
-     *
-     * This only tests the String produced is conform. The underlying
-     * logic is tested in SilanisLotteryTest.testGetWinners().
      */
     @Test
     public void testGenerateWinnersMessage() throws Exception {
-        // test initialisation
+        // Test initialization
+        /* upon this method call, this.lottery.previousLottery
+         * is assigned with this.lottery.currentLottery which is
+         * this.mockCurrentSingleLottery, see testDrawLottery()
+         */
         this.lottery.drawLottery();
 
-        // test body
-        final String result = this.lottery.generateWinnersMessage();
-        assertThat(result).isNotEmpty();
-        final String[] splitResult = result.split(NEW_LINE_PATTERN);
-        assertThat(splitResult)
-                .as("Check there are two lines").hasSize(2);
+        // Test body
+        this.lottery.generateWinnersMessage();
 
-        {
-            // assertions on first line
-            final String[] splitLine = splitResult[0].trim().split("\\t");
-            assertThat(splitLine).hasSize(SilanisLottery.NB_WINNERS);
-            for (final String winner : splitLine) {
-                assertThat(winner).containsPattern(FIRST_LINE_PATTERN);
-            }
-        }
-
-        {
-            // assertions on second line
-            final String[] splitLine = splitResult[1].trim().split("\\t");
-            assertThat(splitLine).hasSize(SilanisLottery.NB_WINNERS);
-            for (final String winner : splitLine) {
-                assertThat(winner).containsPattern(SECOND_LINE_PATTERN);
-            }
-        }
+        // expect strictly one call delegated to SingleLottery.generateWinnersMessage()
+        verify(this.mockCurrentSingleLottery, times(1)).generateWinnersMessage();
     }
 
     /**
-     * Test generateWinnersMessage()
+     * Test generateWinnersMessage() throws NoPreviousDrawException
      */
     @Test
     public void testGenerateWinnersMessageThrowsNoPreviousDrawException() throws Exception {
-        assertThatExceptionOfType(NoPreviousDrawException.class).isThrownBy(
-                () -> this.lottery.generateWinnersMessage()
-        );
-        this.lottery.drawLottery();
-
-        try {
-            final String msg = this.lottery.generateWinnersMessage();
-            LOGGER.info("Result:\n" + msg);
-        } catch (final NoPreviousDrawException e) {
-            fail("Unexpected exception: the lottery has been drawn");
-        }
-    }
-
-    /**
-     * Test generateWinnersMessage while there is no participant
-     */
-    @Test
-    public void testGenerateWinnersMessageWithNoWinners() throws Exception {
-        // test initialisation
-        this.lottery.drawLottery();
-
-        // test body
-        final String result = this.lottery.generateWinnersMessage();
-        final String[] splitResult = result.split(NEW_LINE_PATTERN);
-
-        {
-            // assertions on second line
-            final String[] splitLine = splitResult[1].trim().split("\\t");
-            assertThat(splitLine).hasSize(SilanisLottery.NB_WINNERS);
-            for (final String winner : splitLine) {
-                // each of the elements should display "No winner".
-                assertThat(winner).containsPattern("No winner: [0-9]+\\$");
-            }
-        }
+        assertThatExceptionOfType(NoPreviousDrawException.class)
+                .isThrownBy(() -> this.lottery.generateWinnersMessage());
     }
 
 }
