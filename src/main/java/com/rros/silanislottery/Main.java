@@ -67,6 +67,7 @@ public class Main {
 
             splash();
 
+            //noinspection InfiniteLoopStatement
             while (true) {
                 final String inputCommand = SYSTEM_CONSOLE.readLine("Current pot: %d$ > ", LOTTERY.getPot());
                 interpretCommand(inputCommand);
@@ -88,10 +89,11 @@ public class Main {
      */
     private static void interpretCommand(final String inputCommand) {
         if (inputCommand == null) {
-            SYSTEM_CONSOLE.format("%nUnrecognised key press%n");
-            return;
+            // handles Ctrl-D input
+            exit();
         }
 
+        //noinspection ConstantConditions
         switch (inputCommand) {
             // list commands here
             // nice-to-have commands as enum
