@@ -24,12 +24,10 @@ public class SilanisLottery {
      * Ticket price
      */
     public final static int TICKET_PRICE = 10;
-
     /**
      * Previous lottery
      */
     private SingleLottery previousLottery;
-
     /**
      * Current lottery
      */
@@ -136,5 +134,4 @@ public class SilanisLottery {
     public int getPot() {
         return this.currentLottery.getPot();
     }
-
 }
