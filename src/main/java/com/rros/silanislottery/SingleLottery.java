@@ -1,6 +1,6 @@
 package com.rros.silanislottery;
 
-import com.rros.draw.Drawable;
+import com.rros.draw.DrawableInteger;
 import com.rros.draw.NoAvailableDrawWithoutReplacementException;
 
 import java.util.*;
@@ -15,7 +15,7 @@ import java.util.*;
 public class SingleLottery {
     private int pot;
 
-    private Drawable drawableTickets = new Drawable();
+    private DrawableInteger drawableTickets = new DrawableInteger();
 
     /**
      * Map from ticket to buyer's name
@@ -82,7 +82,7 @@ public class SingleLottery {
         }
 
         if (this.ticketBuyerNames.containsKey(ticket)) {
-            // Should not occur due to how Drawable.drawWithoutReplacement() is implemented
+            // Should not occur due to how DrawableInteger.drawWithoutReplacement() is implemented
             throw new IllegalStateException("Ticket " + ticket + " has already been bought.");
         }
 
@@ -114,7 +114,7 @@ public class SingleLottery {
             throw new SingleLotteryAlreadyDrawnException();
         }
 
-        final Drawable drawableBalls = new Drawable();
+        final DrawableInteger drawableBalls = new DrawableInteger();
         final int[] drawResults = new int[SilanisLottery.NB_WINNERS];
 
         final List<Winner> winnersList = new ArrayList<>();
@@ -221,6 +221,7 @@ public class SingleLottery {
     }
 
     /**
+     * Used for test purposes
      * @return true if a ticket is available for the current draw, false otherwise
      */
     boolean isTicketAvailable() {

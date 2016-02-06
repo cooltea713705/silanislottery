@@ -85,7 +85,7 @@ public class SilanisLottery {
     public int[] drawLottery() {
         final int[] lotteryResults = this.currentLottery.drawLottery();
         this.previousLottery = this.currentLottery;
-        this.currentLottery = new SingleLottery(this.previousLottery.getPot());
+        this.currentLottery = new SingleLottery(this.currentLottery.getPot());
         return lotteryResults;
     }
 

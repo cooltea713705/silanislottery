@@ -9,23 +9,23 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Test class for com.rros.draw.Drawable
+ * Test class for com.rros.draw.DrawableInteger
  */
-public class DrawableTest {
+public class DrawableIntegerTest {
 
-    private Drawable drawable;
+    private DrawableInteger drawableInteger;
 
     @Before
     public void setUp() {
-        drawable = new Drawable();
+        this.drawableInteger = new DrawableInteger();
     }
 
     @Test
     public void testDraw() throws Exception {
         final Set<Integer> draws = new HashSet<>();
 
-        while (drawable.isDrawWithoutReplacementAvailable()) {
-            final int draw = drawable.drawWithoutReplacement();
+        while (this.drawableInteger.isDrawWithoutReplacementAvailable()) {
+            final int draw = this.drawableInteger.drawWithoutReplacement();
             assertThat(draw).isBetween(1, SilanisLottery.MAX_BALL);
             assertThat(draws).doesNotContain(draw);
             draws.add(draw);
@@ -53,7 +53,7 @@ public class DrawableTest {
 
     @Test
     public void testTwoDraws() throws Exception {
-        // Test initialization
+        // Test initialisation
 
         /*
          * find a seed for which the draw differs: we loop until the
@@ -67,13 +67,13 @@ public class DrawableTest {
         }
         while (new Random(seed).nextInt(SilanisLottery.MAX_BALL) == new Random(seed + 1).nextInt(SilanisLottery.MAX_BALL));
 
-        this.drawable = new Drawable(new Random(seed));
+        this.drawableInteger = new DrawableInteger(new Random(seed));
 
         final List<Integer> draws = new ArrayList<>();
         this.fillDraws(draws);
 
         final List<Integer> secondDraws = new ArrayList<>();
-        this.drawable = new Drawable(new Random(seed + 1));
+        this.drawableInteger = new DrawableInteger(new Random(seed + 1));
         this.fillDraws(secondDraws);
         assertThat(secondDraws)
                 .as("The sequence of draws is supposed")
@@ -83,15 +83,15 @@ public class DrawableTest {
     @Test
     public void testTwoDrawsInitializedWithTheSameSeed() throws Exception {
         final long seed = System.currentTimeMillis();
-        this.drawable = new Drawable(new Random(seed));
+        this.drawableInteger = new DrawableInteger(new Random(seed));
 
         final List<Integer> draws = new ArrayList<>();
         this.fillDraws(draws);
 
         final List<Integer> secondDraws = new ArrayList<>();
-        this.drawable = new Drawable(new Random(seed));
+        this.drawableInteger = new DrawableInteger(new Random(seed));
         this.fillDraws(secondDraws);
-        // secondDraws will be strictly equal to this.drawable
+        // secondDraws will be strictly equal to this.drawableInteger
         assertThat(secondDraws).isEqualTo(draws);
     }
 
@@ -102,8 +102,8 @@ public class DrawableTest {
      */
     private void fillDraws(List<Integer> draws) {
         try {
-            while (this.drawable.isDrawWithoutReplacementAvailable()) {
-                final int draw = this.drawable.drawWithoutReplacement();
+            while (this.drawableInteger.isDrawWithoutReplacementAvailable()) {
+                final int draw = this.drawableInteger.drawWithoutReplacement();
                 draws.add(draw);
             }
         } catch (final NoAvailableDrawWithoutReplacementException e) {
@@ -114,15 +114,15 @@ public class DrawableTest {
     @Test
     public void testDrawNoAvailableDrawException() throws Exception {
         try {
-            while (this.drawable.isDrawWithoutReplacementAvailable()) {
-                this.drawable.drawWithoutReplacement();
+            while (this.drawableInteger.isDrawWithoutReplacementAvailable()) {
+                this.drawableInteger.drawWithoutReplacement();
             }
         } catch (final NoAvailableDrawWithoutReplacementException e) {
             fail("Unexpected exception", e);
         }
         // The SilanisLottery.MAX_BALL + 1 call (and all subsequent calls) are expected to throw an exception
-        assertThatExceptionOfType(NoAvailableDrawWithoutReplacementException.class).isThrownBy(() -> drawable.drawWithoutReplacement());
-        assertThatExceptionOfType(NoAvailableDrawWithoutReplacementException.class).isThrownBy(() -> drawable.drawWithoutReplacement());
-        // assertThatThrownBy(() -> drawable.draw()).isInstanceOf(NoAvailableDrawWithoutReplacementException.class);
+        assertThatExceptionOfType(NoAvailableDrawWithoutReplacementException.class).isThrownBy(() -> this.drawableInteger.drawWithoutReplacement());
+        assertThatExceptionOfType(NoAvailableDrawWithoutReplacementException.class).isThrownBy(() -> this.drawableInteger.drawWithoutReplacement());
+        // assertThatThrownBy(() -> this.drawableInteger.draw()).isInstanceOf(NoAvailableDrawWithoutReplacementException.class);
     }
 }

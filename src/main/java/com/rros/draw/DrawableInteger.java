@@ -7,7 +7,7 @@ import java.util.Random;
 /**
  * Drawable integer values between 1 and SilanisLottery.MAX_BALL
  */
-public class Drawable {
+public class DrawableInteger {
 
     /**
      * Current drawables, currentMax is the index of the last drawn element if there is one (otherwise its value is drawables.length)
@@ -29,7 +29,7 @@ public class Drawable {
     /**
      * Initialize the drawable collection of integer values
      */
-    public Drawable() {
+    public DrawableInteger() {
         this(new Random());
     }
 
@@ -38,7 +38,7 @@ public class Drawable {
      *
      * @param random input random, used for debugging (reproducible draws)
      */
-    Drawable(final Random random) {
+    DrawableInteger(final Random random) {
         this.random = random;
 
         for (int i = 0; i < SilanisLottery.MAX_BALL; i++) {

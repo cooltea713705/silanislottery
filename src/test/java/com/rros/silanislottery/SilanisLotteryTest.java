@@ -41,8 +41,8 @@ public class SilanisLotteryTest {
     @Test
     public void testDrawLottery() throws Exception {
         assertThat(this.lottery.getPreviousLottery()).isNull();
-        this.lottery.drawLottery();
 
+        this.lottery.drawLottery();
         // expect strictly one call delegated to SingleLottery.drawLottery
         verify(this.mockCurrentSingleLottery, times(1)).drawLottery();
         assertThat(this.lottery.getPreviousLottery())
@@ -52,11 +52,31 @@ public class SilanisLotteryTest {
     }
 
     /**
+     * Test drawLottery() twice
+     */
+    @Test
+    public void testDrawLotteryTwice() throws Exception {
+        assertThat(this.lottery.getPreviousLottery()).isNull();
+
+        this.lottery.drawLottery();
+        verify(this.mockCurrentSingleLottery, times(1)).drawLottery();
+
+        reset(this.mockCurrentSingleLottery);
+        this.lottery.drawLottery();
+        // expect this.mockCurrentSingleLottery.drawLottery() to not be called once again
+        verify(this.mockCurrentSingleLottery, never()).drawLottery();
+        assertThat(this.lottery.getPreviousLottery())
+                .isNotNull()
+                .as("The mock is not assigned to SilanisLottery.previousLottery anymore")
+                .isNotEqualTo(this.mockCurrentSingleLottery);
+    }
+
+    /**
      * Test the pot is updated correctly after multiple lotteries
      */
     @Test
     public void testDrawLotteryPotUpdated() throws Exception {
-        // Test initialization
+        // Test initialisation
         // Does not use mock
         this.lottery = new SilanisLottery();
         int currentPot = this.lottery.getPot();
@@ -91,7 +111,7 @@ public class SilanisLotteryTest {
     /** Test purchaseTicket() after drawLottery(): the previous winning tickets should be available for purchase again */
     @Test
     public void testPurchasingTicketsDrawLottery() throws Exception {
-        // Test initialization: does not use the mock
+        // Test initialisation: does not use the mock
         this.lottery = new SilanisLottery();
 
         // Test body
@@ -117,7 +137,7 @@ public class SilanisLotteryTest {
      */
     @Test
     public void testGenerateWinnersMessage() throws Exception {
-        // Test initialization
+        // Test initialisation
         /* upon this method call, this.lottery.previousLottery
          * is assigned with this.lottery.currentLottery which is
          * this.mockCurrentSingleLottery, see testDrawLottery()

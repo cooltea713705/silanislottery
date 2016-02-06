@@ -48,13 +48,17 @@ public class SingleLotteryTest {
         assertThat(newPot).as("Pot value was updated consecutively to ticket purchase").isEqualTo(initialPot + SilanisLottery.TICKET_PRICE);
     }
 
+    private void assertThatPurchasingTicketThrowsInvalidBuyerNameExceptionIsThrown(final String buyerName) {
+        assertThatExceptionOfType(InvalidBuyerNameException.class)
+                .isThrownBy(() -> this.lottery.purchaseTicket(buyerName));
+    }
+
     /**
      * Test purchaseTicket() with null buyer name
      */
     @Test
     public void testPurchaseTicketNullBuyerName() throws Exception {
-        assertThatExceptionOfType(InvalidBuyerNameException.class)
-                .isThrownBy(() -> this.lottery.purchaseTicket(null));
+        assertThatPurchasingTicketThrowsInvalidBuyerNameExceptionIsThrown(null);
     }
 
     /**
@@ -62,8 +66,7 @@ public class SingleLotteryTest {
      */
     @Test
     public void testPurchaseTicketEmptyBuyerName() throws Exception {
-        assertThatExceptionOfType(InvalidBuyerNameException.class)
-                .isThrownBy(() -> this.lottery.purchaseTicket(""));
+        assertThatPurchasingTicketThrowsInvalidBuyerNameExceptionIsThrown("");
     }
 
     /**
@@ -71,15 +74,14 @@ public class SingleLotteryTest {
      */
     @Test
     public void testPurchaseTicketWhiteSpaceBuyerName() throws Exception {
-        assertThatExceptionOfType(InvalidBuyerNameException.class)
-                .isThrownBy(() -> this.lottery.purchaseTicket(" "));
+        assertThatPurchasingTicketThrowsInvalidBuyerNameExceptionIsThrown(" ");
     }
 
     /**
-     * Test purchaseTicket() throws NoMoreTicketException
+     * Test purchaseTicket() throws NoAvailableTicketException
      */
     @Test
-    public void testPurchaseTicketThrowsNoMoreTicketException() throws Exception {
+    public void testPurchaseTicketThrowsNoAvailableTicketException() throws Exception {
         final List<Integer> boughtTickets = new ArrayList<>();
         try {
             while (this.lottery.isTicketAvailable()) {
@@ -99,7 +101,7 @@ public class SingleLotteryTest {
      */
     @Test
     public void testPurchaseTicketThrowsSingleLotteryAlreadyDrawnException() throws Exception {
-        // Test initialization
+        // Test initialisation
         this.lottery.drawLottery();
 
         // Test body
@@ -114,8 +116,14 @@ public class SingleLotteryTest {
     public void testDrawLottery() throws Exception {
         final int[] currentDraw = this.lottery.drawLottery();
         assertThat(currentDraw)
-                .hasSize(SilanisLottery.NB_WINNERS);
-        assertThat(this.lottery.getWinners()).isNotNull();
+                .hasSize(SilanisLottery.NB_WINNERS)
+                .doesNotHaveDuplicates();
+        for (final int draw : currentDraw) {
+            assertThat(draw).isBetween(1, SilanisLottery.MAX_BALL);
+        }
+        assertThat(this.lottery.getWinners())
+                .as("The winners should be designated")
+                .isNotNull();
     }
 
     /**
@@ -123,11 +131,9 @@ public class SingleLotteryTest {
      */
     @Test
     public void testDrawLotteryTwice() throws Exception {
+        this.lottery.drawLottery();
         assertThatExceptionOfType(SingleLotteryAlreadyDrawnException.class)
-                .isThrownBy(() -> {
-                    this.lottery.drawLottery();
-                    this.lottery.drawLottery();
-                });
+                .isThrownBy(() -> this.lottery.drawLottery());
     }
 
     /**
@@ -149,7 +155,7 @@ public class SingleLotteryTest {
      */
     @Test
     public void testDrawLotteryPotUpdated() throws Exception {
-        // Test initialization
+        // Test initialisation
         int currentPot = this.lottery.getPot();
         final int nbParticipants = 20;
 
@@ -162,6 +168,7 @@ public class SingleLotteryTest {
                     .isEqualTo(currentPot);
         }
 
+        // Test body
         this.lottery.drawLottery();
 
         // pay the winners: pot has to be updated by subtracting their prizes
@@ -222,7 +229,7 @@ public class SingleLotteryTest {
      */
     @Test
     public void testGetWinners() throws Exception {
-        // Test initialization: we make sure every ticket is bought
+        // Test initialisation: we make sure every ticket is bought
         final Map<Integer, String> ticketBuyer = new HashMap<>();
         int i = 1;
         final String buyerNamePrefix = "BUYER";
@@ -237,6 +244,7 @@ public class SingleLotteryTest {
         final int[] prizes = this.lottery.computePrizes();
         final int[] results = this.lottery.drawLottery();
 
+        // Test body
         assertThat(this.lottery.getWinners()).extracting("firstName", "prize")
                 .as("We have the results, the winners' first names and prize must match")
                 .containsExactly(
@@ -268,7 +276,7 @@ public class SingleLotteryTest {
      */
     @Test
     public void testGetWinnersWithAtLeastANonWinner() throws Exception {
-        // Test initialization
+        // Test initialisation
         for (int i = 0; i < SilanisLottery.NB_WINNERS - 1; i++) {
             this.lottery.purchaseTicket(TEST_BUYER_NAME);
             this.lottery.purchaseTicket(TEST_BUYER_NAME);
@@ -276,10 +284,20 @@ public class SingleLotteryTest {
 
         this.lottery.drawLottery();
 
+        // Test body
         // NB_WINNERS - 1 tickets were bought and the lottery was drawn:
         // There will be at least one non-winning ball drawn
         // .contains(null): IDE complains that we provide null to a var-arg method
         assertThat(this.lottery.getWinners()).contains(new Winner[]{null});
+    }
+
+    /**
+     * Test getWinners() throws SingleLotteryNotDrawnException
+     */
+    @Test
+    public void testGetWinnersThrowsSingleLotteryNotDrawnException() throws Exception {
+        assertThatExceptionOfType(SingleLotteryNotDrawnException.class)
+                .isThrownBy(() -> this.lottery.getWinners());
     }
 
     /**
