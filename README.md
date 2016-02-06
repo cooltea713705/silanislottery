@@ -14,6 +14,18 @@ Use the following command at the root of the project folder to run the applicati
 ```shell
 $ mvn clean compile assembly:single
 
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Silanis Lottery %VERSION%
+[INFO] ------------------------------------------------------------------------
+
+[...]
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+
 [...]
 
 $ java -jar target/silanislottery-%VERSION%-jar-with-dependencies.jar
