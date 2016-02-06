@@ -77,7 +77,7 @@ public class Drawable {
     /**
      * @return true if a draw without replacement is available, false otherwise
      */
-    boolean isDrawWithoutReplacementAvailable() {
+    public boolean isDrawWithoutReplacementAvailable() {
         // no more draw available when currentMax is equal to or lesser than 0
         return this.currentMax > 0;
     }

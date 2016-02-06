@@ -26,51 +26,42 @@ public class SilanisLottery {
     public final static int TICKET_PRICE = 10;
 
     /**
-     * Current pot
+     * Previous lottery
      */
-    private int pot;
+    private SingleLottery previousLottery;
 
     /**
-     * Purchase a ticket
-     * <p>
-     * Given a ticket buyer's first name, this will return a random ticket number that still is available.
-     * Ticket number will be returned from 1 to 50
-     * <p>
-     * Nice-to-have: similar function where the buyer chooses its ticket number.
+     * Current lottery
+     */
+    private SingleLottery currentLottery = new SingleLottery(INITIAL_POT);
+
+    /**
+     * Purchase a ticket.
      *
-     * @param buyerName ticket buyer's first name
+     * Delegates to SingleLottery.purchaseTicket() for the current lottery.
+     *
+     * @param buyerName ticket buyer's first name, has to be not null, not empty, not a white-space only String.
      * @return the ticket number
+     * @throws InvalidBuyerNameException the provided buyer's name is invalid
      * @throws NoAvailableTicketException no more ticket is available for this draw
      */
-    public int purchaseTicket(final String buyerName) throws NoAvailableTicketException {
-        // not implemented
-        throw new RuntimeException("Not implemented");
+    public int purchaseTicket(final String buyerName) throws NoAvailableTicketException, InvalidBuyerNameException {
+        return this.currentLottery.purchaseTicket(buyerName);
     }
 
     /**
      * Draw lottery.
      *
-     * Nota: this operation updates the pot: if a winning ball's ticket
-     * has been purchased, the winning prize is subtracted to the pot,
-     * otherwise the pot is left untouched.
+     * Delegates to SingleLottery.drawLottery() for the current lottery and
+     * then saves the previous lottery and start anew the current one.
      *
      * @return the values of the drawn balls
      */
     public int[] drawLottery() {
-        // not implemented
-        throw new RuntimeException("Not implemented");
-    }
-
-    /**
-     * Compute the values of the prizes for the current value of the pot.
-     * <p>
-     * 75%, 15% and 10% of the pot rounded to the nearest integer value.
-     *
-     * @return Array of NB_WINNERS int corresponding to the prizes.
-     */
-    int[] computePrizes() {
-        // not implemented
-        throw new RuntimeException("Not implemented");
+        final int[] lotteryResults = this.currentLottery.drawLottery();
+        this.previousLottery = this.currentLottery;
+        this.currentLottery = new SingleLottery(this.previousLottery.getPot());
+        return lotteryResults;
     }
 
     /**
@@ -82,8 +73,15 @@ public class SilanisLottery {
      * @throws NoPreviousDrawException there was no previous draw
      */
     Winner[] getWinners() throws NoPreviousDrawException {
-        // not implemented
-        throw new RuntimeException("Not implemented");
+        if (this.previousLottery == null) {
+            throw new NoPreviousDrawException();
+        }
+
+        try {
+            return this.previousLottery.getWinners();
+        } catch (final SingleLotteryNotDrawnException e) {
+            throw new IllegalStateException("The previous lottery should have been drawn", e);
+        }
     }
 
     /**
@@ -107,7 +105,7 @@ public class SilanisLottery {
      * @return the current pot value
      */
     int getPot() {
-        return pot;
+        return this.currentLottery.getPot();
     }
 
     /**

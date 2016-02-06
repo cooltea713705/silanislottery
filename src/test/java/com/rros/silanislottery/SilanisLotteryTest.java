@@ -3,7 +3,9 @@ package com.rros.silanislottery;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -129,21 +131,6 @@ public class SilanisLotteryTest {
         }
     }
 
-    /** Test computePrizes() */
-    @Test
-    public void testComputePrizes() throws Exception {
-        // test initialisation
-        final int initialPot = this.lottery.getPot();
-
-        // test body
-        final int[] prizes = this.lottery.computePrizes();
-        assertThat(prizes)
-                .hasSize(SilanisLottery.NB_WINNERS);
-        assertThat(prizes)
-                .as("75%, 15% and 10% of half the initial pot")
-                .isEqualTo(new int[]{initialPot / 2 * 3 / 4, initialPot / 2 * 3 / 20, initialPot / 2 / 10});
-    }
-
     /**
      * Test getWinners() while there is no ticket purchased which should
      * results in no winner.
@@ -175,25 +162,8 @@ public class SilanisLotteryTest {
      */
     @Test
     public void testGetWinners() throws Exception {
-        // Test initialization: we make sure every ticket is bought
-        final Map<Integer, String> ticketBuyer = new HashMap<>();
-        int i = 1;
-        final String buyerNamePrefix = "BUYER";
-
-        while (this.lottery.isTicketAvailable()) {
-            final String buyerName = buyerNamePrefix + i;
-            // map ticket number -> buyer's name
-            ticketBuyer.put(this.lottery.purchaseTicket(buyerName), buyerName);
-        }
-        final int[] results = this.lottery.drawLottery();
-        final int[] prizes = this.lottery.computePrizes();
-        assertThat(this.lottery.getWinners()).extracting("name", "prize")
-                .as("We have the results, the winners' names and prize must match")
-                .containsExactly(
-                        tuple(ticketBuyer.get(results[0]), prizes[0]),
-                        tuple(ticketBuyer.get(results[1]), prizes[1]),
-                        tuple(ticketBuyer.get(results[2]), prizes[2])
-                );
+        fail("Was not implemented");
+        // TODO
     }
 
     /**
@@ -202,7 +172,7 @@ public class SilanisLotteryTest {
      */
     @Test
     public void testGetWinnersWithAtLeastANonWinner() throws Exception {
-        fail("Was not implementedR");
+        fail("Was not implemented");
         // TODO: force drawing a non-winning ball and check getWinners()
     }
 

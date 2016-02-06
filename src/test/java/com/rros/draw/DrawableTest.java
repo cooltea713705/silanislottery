@@ -2,11 +2,9 @@ package com.rros.draw;
 
 import com.rros.silanislottery.SilanisLottery;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -15,7 +13,6 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class DrawableTest {
 
-    private final static Logger LOGGER = Logger.getGlobal();
     private Drawable drawable;
 
     @Before
@@ -37,20 +34,39 @@ public class DrawableTest {
                 .doesNotHaveDuplicates();
     }
 
-    @Ignore
+    /**
+     * Test that before the timeout we have a draw that is not 1, 2, ..., MAX
+     */
+    @Test(timeout = 1000L)
     public void testDrawIsRandom() throws Exception {
-        final List<Integer> draws = new ArrayList<>();
+        final List<Integer> nonRandom = new ArrayList<>();
+        for (int i = 1; i < SilanisLottery.MAX_BALL; i++) {
+            nonRandom.add(i);
+        }
 
-        this.fillDraws(draws);
-
-        LOGGER.info(() -> "Draws should be a random list of ints: " + draws);
-        // There is a chance the series of draws 1, 2, 3, 4..., 50 comes up (the probability is small)
-        // TODO: Something we could try and assert is the distribution of draws orders
+        List<Integer> draws;
+        do {
+            draws = new ArrayList<>();
+            this.fillDraws(draws);
+        } while (draws.equals(nonRandom));
     }
 
-    @Ignore
+    @Test
     public void testTwoDraws() throws Exception {
-        final long seed = System.currentTimeMillis();
+        // Test initialization
+
+        /*
+         * find a seed for which the draw differs: we loop until the
+         * first index drawn (Random(seed).nextInt(SilanisLottery.MAX_BALL))
+         * is different from the first index drawn for
+         * Random(seed + 1).SilanisLottery.MAX_BALL
+         */
+        long seed;
+        do {
+            seed = System.currentTimeMillis();
+        }
+        while (new Random(seed).nextInt(SilanisLottery.MAX_BALL) == new Random(seed + 1).nextInt(SilanisLottery.MAX_BALL));
+
         this.drawable = new Drawable(new Random(seed));
 
         final List<Integer> draws = new ArrayList<>();
@@ -59,8 +75,9 @@ public class DrawableTest {
         final List<Integer> secondDraws = new ArrayList<>();
         this.drawable = new Drawable(new Random(seed + 1));
         this.fillDraws(secondDraws);
-        // TODO secondDraws will **most likely** be different from this.drawable
-        assertThat(secondDraws).isNotEqualTo(draws);
+        assertThat(secondDraws)
+                .as("The sequence of draws is supposed")
+                .isNotEqualTo(draws);
     }
 
     @Test
