@@ -67,6 +67,7 @@ public class Main {
 
             splash();
 
+            // Ignored warning: infinite loop statement is desired.
             //noinspection InfiniteLoopStatement
             while (true) {
                 final String inputCommand = SYSTEM_CONSOLE.readLine("Current pot: %d$ > ", LOTTERY.getPot());
@@ -93,6 +94,7 @@ public class Main {
             exit();
         }
 
+        // Ignored IDE warning: if inputCommand is null, the application should have exited above
         //noinspection ConstantConditions
         switch (inputCommand) {
             // list commands here
