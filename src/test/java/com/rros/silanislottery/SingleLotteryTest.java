@@ -378,4 +378,22 @@ public class SingleLotteryTest {
         }
     }
 
+    /**
+     * Test generateWinnersMessage 1st line starts with "1st ball" instead of "0th"
+     */
+    @Test
+    public void testGenerateWinnersMessageStartsWith1st() throws Exception {
+        // test initialisation
+        this.lottery.drawLottery();
+
+        // test body
+        final String result = this.lottery.generateWinnersMessage();
+        final String[] splitResult = result.split(NEW_LINE_PATTERN);
+
+        {
+            // assertions on first line
+            final String[] splitLine = splitResult[0].trim().split("\\t");
+            assertThat(splitLine[0]).isEqualTo("1st ball");
+        }
+    }
 }

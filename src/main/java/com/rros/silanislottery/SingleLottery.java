@@ -206,7 +206,7 @@ public class SingleLottery {
         final StringJoiner secondLineSj = new StringJoiner("\t");
         final int[] prizes = this.computePrizes();
         for (int i = 0; i < this.winners.length; i++) {
-            firstLineSj.add(SingleLottery.ordinal(i) + " ball");
+            firstLineSj.add(SingleLottery.ordinal(i + 1) + " ball");
             final String secondLinePart = winners[i] == null ? "No winner" : winners[i].getFirstName();
             secondLineSj.add(secondLinePart + ": " + prizes[i] + "$");
         }
