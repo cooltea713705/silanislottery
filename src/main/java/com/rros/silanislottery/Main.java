@@ -170,7 +170,7 @@ public class Main {
      * Display splash
      */
     private static void splash() {
-        SYSTEM_CONSOLE.format("Welcome to the Silanis Lottery!%nThe current pot is: %d$%nThe following commands are available:%n", LOTTERY.getPot());
+        SYSTEM_CONSOLE.format("Welcome to the Silanis Lottery!%nThe current pot is: %d$%n", LOTTERY.getPot());
         getHelp();
     }
 
@@ -178,6 +178,8 @@ public class Main {
      * Handle help command
      */
     private static void getHelp() {
+
+        SYSTEM_CONSOLE.format("Type one of the following commands in the prompt to execute it:%n");
         SYSTEM_CONSOLE.format("help\tGet this help message%n");
         SYSTEM_CONSOLE.format("purchase %%buyer's first name%%\tPurchase a ticket (%d$)%n", SilanisLottery.TICKET_PRICE);
         SYSTEM_CONSOLE.format("draw\tDraw lottery%n");
