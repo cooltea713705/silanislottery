@@ -4,14 +4,40 @@ Recruiting Test : Silanis Lottery
 Requirements
 ------------
 
-maven (built using 3.3.9), jdk1.8
+* maven (built using 3.3.9)
+* jdk1.8
 
-Install
--------
+Install from binaries
+---------------------
 
-Use the following command at the root of the project folder to run the application.
+Download the release zip archive and use the following command at the location of the archive.
 
-```shell
+```
+$ unzip silanislottery-v%VERSION%-binaries.zip
+
+Archive:  silanislottery-v%VERSION%-binaries.zip
+   creating: silanislottery-v%VERSION%/
+  inflating: silanislottery-v%VERSION%/LICENSE.md  
+  inflating: silanislottery-v%VERSION%/README.md  
+  inflating: silanislottery-v%VERSION%/silanislottery-%VERSION%-jar-with-dependencies.jar  
+
+$ cd silanislottery-v%VERSION%
+
+$ java -jar silanislottery-%VERSION%-jar-with-dependencies.jar
+
+Welcome to Silanis Lottery!
+
+[...]
+
+Current pot: 200$ > 
+```
+
+Install from sources
+--------------------
+
+Use the following command at the root of the project folder to build and run the application.
+
+```
 $ mvn clean compile assembly:single
 
 [INFO] Scanning for projects...
@@ -28,7 +54,9 @@ $ mvn clean compile assembly:single
 
 [...]
 
-$ java -jar target/silanislottery-%VERSION%-jar-with-dependencies.jar
+$ cd target
+
+$ java -jar silanislottery-v%VERSION%-jar-with-dependencies.jar
 
 Welcome to Silanis Lottery!
 
@@ -37,15 +65,16 @@ Welcome to Silanis Lottery!
 Current pot: 200$ > 
 ```
 
-The first command will generate target/silanislottery-VERSION-jar-with-dependencies.jar with all dependencies.
-The second will run the application: it opens a prompt where you input commands to manage the lottery.
+The first command will generate `target/silanislottery-VERSION-jar-with-dependencies.jar` with all dependencies.
+The `java -jar` command will run the application: it opens a prompt where you input commands to manage the lottery.
 
-### Command line parameters:
+Command line parameters:
+------------------------
 
 Get command line parameters information with the `-help` flag. 
 
-```shell
-$ java -jar target/silanislottery-%VERSION%-jar-with-dependencies.jar -help
+```
+$ java -jar silanislottery-%VERSION%-jar-with-dependencies.jar -help
 ```
 
 
