@@ -1,7 +1,7 @@
 package com.rros.silanislottery;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,8 @@ public class SilanisLotteryTest {
     private SilanisLottery lottery;
 
     private SingleLottery mockCurrentSingleLottery;
-    @Before
+
+    @BeforeEach
     public void setUp() throws Exception {
         this.mockCurrentSingleLottery = mock(SingleLottery.class);
         this.lottery = new SilanisLottery(this.mockCurrentSingleLottery);

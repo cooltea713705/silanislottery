@@ -1,7 +1,7 @@
 package com.rros.silanislottery;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class SingleLotteryTest {
 
     private SingleLottery lottery;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         this.lottery = new SingleLottery(SilanisLottery.INITIAL_POT);
     }

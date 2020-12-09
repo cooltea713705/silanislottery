@@ -1,8 +1,9 @@
 package com.rros.draw;
 
 import com.rros.silanislottery.SilanisLottery;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.*;
 
@@ -15,7 +16,7 @@ public class DrawableIntegerTest {
 
     private DrawableInteger drawableInteger;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.drawableInteger = new DrawableInteger();
     }
@@ -37,7 +38,8 @@ public class DrawableIntegerTest {
     /**
      * Test that before the timeout we have a draw that is not 1, 2, ..., MAX
      */
-    @Test(timeout = 1000L)
+    @Test
+    @Timeout(1)
     public void testDrawIsRandom() throws Exception {
         final List<Integer> nonRandom = new ArrayList<>();
         for (int i = 1; i < SilanisLottery.MAX_BALL; i++) {

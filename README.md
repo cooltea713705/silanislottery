@@ -4,8 +4,8 @@ Recruiting Test : Silanis Lottery
 Requirements
 ------------
 
-* maven (built using 3.3.9)
-* jdk1.8
+* maven (built using 3.6.1)
+* jdk 15
 
 Install from binaries
 ---------------------
@@ -101,9 +101,10 @@ Tommy would like to enter the modern age and is asking you to write a software p
 
 * I want to display the winning tickets as follows:
 
-1st ball        2nd ball        3rd ball
 
-Dave: 75$    Remy: 15$   Greg: 10$
+| 1st ball | 2nd ball | 3rd ball |
+|----------|----------|----------|
+| Dave: 75$|Remy: 15$ | Greg: 10$|
 
 Tommy will be happy with a console application. But he’s asking that the three functionalities mentioned above be executed with the commands “purchase”, “draw” and “winners”.
 
